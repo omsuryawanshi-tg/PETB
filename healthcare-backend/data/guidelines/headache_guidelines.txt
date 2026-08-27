@@ -1,0 +1,22 @@
+# Clinical Triage Guidelines: Headache Evaluation & Triage
+
+## Overview
+Headaches can range from benign primary headache disorders (e.g., tension-type, migraine) to life-threatening secondary causes (e.g., subarachnoid hemorrhage, meningitis, temporal arteritis, intracranial mass).
+
+## Red Flag Symptoms (Emergency - Immediate ER Evaluation)
+- Sudden onset "thunderclap" headache (reaches peak intensity within seconds/minutes).
+- Headache accompanied by fever, neck stiffness (nuchal rigidity), confusion, or altered mental status.
+- New neurological deficits (e.g., focal weakness, numbness, speech difficulty, visual loss).
+- New onset headache in patients over 50 years of age or patients with a history of cancer or immunosuppression.
+- Headache following head trauma.
+
+## Moderate Risk Symptoms (Urgent Physician Consultation within 24-48 Hours)
+- Progressive worsening headache pattern over days or weeks.
+- Migraine non-responsive to over-the-counter abortive treatment.
+- Headache associated with nausea, mild photophobia, or sinus pressure.
+- Unilateral headache with throbbing sensation disrupting daily tasks.
+
+## Low Risk / Primary Headache (Self-Care & Routine Monitoring)
+- Mild to moderate bilateral band-like tightness around the head (Tension headache).
+- Headache associated with fatigue, stress, dehydration, or lack of sleep.
+- Recommendation: Rest in a quiet dark room, hydration, and over-the-counter analgesics (e.g., Acetaminophen 500mg or Ibuprofen 400mg) as directed. Seek medical review if pain worsens or persists beyond 3 days.

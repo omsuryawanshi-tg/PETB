@@ -1,0 +1,22 @@
+# Clinical Triage Guidelines: Abdominal Pain Evaluation & Triage
+
+## Overview
+Abdominal pain can stem from self-limiting gastrointestinal issues or life-threatening surgical emergencies (e.g., acute appendicitis, bowel perforation, ectopic pregnancy, aortic aneurysm).
+
+## Red Flag Symptoms (Emergency - Immediate ER Evaluation)
+- Sudden, severe, intolerable abdominal pain ("acute abdomen").
+- Abdominal pain accompanied by rigid, board-like abdomen or severe tenderness to light touch.
+- Vomiting blood (hematemesis) or passing black, tarry stools (melena).
+- Pain accompanied by high fever, persistent vomiting, jaundice, or inability to pass gas/stool.
+- Sharp right lower quadrant pain with rebound tenderness (suspicious for appendicitis).
+- Sudden severe abdominal pain in pregnant individuals.
+
+## Moderate Risk Symptoms (Urgent Medical Consultation within 12-24 Hours)
+- Persistent localized abdominal pain lasting over 6 hours.
+- Abdominal pain accompanied by low-grade fever, nausea, or diarrhea for more than 48 hours.
+- Pain worsening with movement or coughing.
+- Pain associated with unexplained weight loss or loss of appetite.
+
+## Low Risk / Self-Care Guidelines
+- Mild generalized crampy abdominal discomfort associated with indigestion, mild diarrhea, or constipation.
+- Recommendation: Sip clear fluids, eat bland food (BRAT diet: bananas, rice, applesauce, toast), avoid dairy, fatty, or spicy foods. Use antacids for mild heartburn. Seek evaluation if pain persists beyond 24 hours.

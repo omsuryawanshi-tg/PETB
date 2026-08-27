@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pydantic
+chromadb
+langchain
+langchain-community
+sentence-transformers
+requests
+langchain-ollama
+sqlalchemy
