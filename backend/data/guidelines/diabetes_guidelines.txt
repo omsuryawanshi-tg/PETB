@@ -1,0 +1,21 @@
+# Clinical Triage Guidelines: Diabetes-Related Symptoms
+
+## Overview
+Diabetes-related presentations include hyperglycemia, hypoglycemia, and chronic complications requiring appropriate triage.
+
+## Red Flag Symptoms (Emergency)
+- Diabetic ketoacidosis (DKA): nausea, vomiting, fruity breath, rapid breathing, blood glucose >300 mg/dL with ketones.
+- Severe hypoglycemia: confusion, seizures, loss of consciousness, blood glucose <54 mg/dL.
+- Hyperosmolar hyperglycemic state: extreme thirst, very high blood glucose (>600 mg/dL), altered consciousness.
+- Diabetic foot ulcer with signs of spreading infection (redness, warmth, drainage, fever).
+
+## Moderate Risk (Physician Consultation within 24-48 Hours)
+- Consistently elevated fasting blood glucose (>180 mg/dL) despite medication.
+- Recurrent hypoglycemic episodes (more than 2 per week).
+- New numbness or tingling in feet (peripheral neuropathy).
+- Visual changes (blurring) in a diabetic patient.
+- Non-healing wound on foot lasting more than 1 week.
+
+## Low Risk / Self-Care
+- Mild blood glucose fluctuations within expected range.
+- Recommendation: Follow prescribed medication regimen, monitor blood glucose regularly, maintain balanced diet, regular exercise. Annual eye and foot examinations. Seek care if persistent readings outside target range.

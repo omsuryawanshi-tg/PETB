@@ -1,0 +1,21 @@
+# Clinical Triage Guidelines: Headache Assessment
+
+## Overview
+Headaches range from tension-type (most common) to potentially life-threatening conditions requiring immediate evaluation.
+
+## Red Flag Symptoms (Emergency)
+- Thunderclap headache: sudden, severe onset reaching maximum intensity within seconds.
+- Headache with fever, stiff neck, and photophobia (meningitis triad).
+- New headache with focal neurological deficits (weakness, vision loss, speech difficulty).
+- Headache following head trauma with altered consciousness.
+- Worst headache of life with nausea and vomiting.
+
+## Moderate Risk (Physician Consultation within 24-48 Hours)
+- New daily persistent headache lasting more than 3 days.
+- Migraine with aura not previously evaluated.
+- Headache worsening with position changes or Valsalva maneuver.
+- Headache in patients over 50 with no prior history.
+
+## Low Risk / Self-Care
+- Tension-type headache: bilateral, pressing quality, mild-to-moderate.
+- Recommendation: OTC analgesics (Acetaminophen 500mg or Ibuprofen 400mg), stress management, adequate sleep, hydration. Seek care if frequency exceeds 15 days/month.

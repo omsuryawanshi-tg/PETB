@@ -1,0 +1,21 @@
+# Clinical Triage Guidelines: Allergic Reactions
+
+## Overview
+Allergic reactions range from mild localized responses to life-threatening anaphylaxis requiring immediate treatment.
+
+## Red Flag Symptoms (Emergency - Administer Epinephrine, Call 911)
+- Anaphylaxis: hives with difficulty breathing, throat tightness, or swelling of tongue/lips.
+- Severe allergic reaction with hypotension (dizziness, fainting, rapid weak pulse).
+- Known severe allergy with accidental exposure and any systemic symptoms.
+- Angioedema affecting airway (swelling of lips, tongue, throat).
+
+## Moderate Risk (Physician Evaluation Same Day or Next Day)
+- Widespread hives (urticaria) without respiratory compromise.
+- Allergic reaction with facial swelling but no airway symptoms.
+- Recurrent allergic episodes needing allergy testing referral.
+- Drug reaction with rash (non-severe) requiring medication adjustment.
+
+## Low Risk / Self-Care
+- Mild seasonal allergies: sneezing, runny nose, itchy eyes.
+- Localized contact reaction: small area of redness or itching.
+- Recommendation: OTC antihistamines (Cetirizine 10mg or Loratadine 10mg daily), nasal saline spray, avoid known allergens. Seek care if symptoms worsen or OTC medications are inadequate.

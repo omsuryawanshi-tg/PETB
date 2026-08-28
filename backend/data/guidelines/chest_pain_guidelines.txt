@@ -1,0 +1,22 @@
+# Clinical Triage Guidelines: Chest Pain Evaluation
+
+## Overview
+Chest pain requires careful evaluation as it may indicate cardiac emergencies or benign musculoskeletal conditions.
+
+## Red Flag Symptoms (Emergency - Call 911)
+- Crushing, pressure-like chest pain radiating to left arm, jaw, or back.
+- Chest pain with shortness of breath, sweating, nausea, or lightheadedness.
+- Known cardiac history with new or worsening chest pain.
+- Chest pain with syncope (fainting) or near-syncope.
+- Sharp, sudden chest pain with difficulty breathing (possible pneumothorax or PE).
+
+## Moderate Risk (Same-Day Physician Evaluation)
+- Chest pain reproducible with palpation but persistent.
+- New chest pain with exertion that resolves with rest (possible stable angina).
+- Chest pain with palpitations or irregular heartbeat.
+- Pleuritic chest pain (sharp, worsens with breathing) with mild fever.
+
+## Low Risk / Self-Care
+- Brief, sharp chest pain related to movement or posture (musculoskeletal).
+- Chest pain after heavy meal or with acid reflux symptoms.
+- Recommendation: Rest, antacids for GERD symptoms, NSAIDs for musculoskeletal pain. Seek immediate care if pain worsens, recurs, or is accompanied by shortness of breath.

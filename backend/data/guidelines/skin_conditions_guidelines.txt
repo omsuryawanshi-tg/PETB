@@ -1,0 +1,20 @@
+# Clinical Triage Guidelines: Common Skin Conditions
+
+## Overview
+Skin complaints include rashes, lesions, itching, and infections. Most are non-urgent but some require prompt evaluation.
+
+## Red Flag Symptoms (Emergency)
+- Rapidly spreading rash with fever and systemic illness (possible meningococcemia, Stevens-Johnson syndrome).
+- Skin infection with red streaking, high fever, and rapid progression (cellulitis/necrotizing fasciitis).
+- Severe allergic reaction with hives AND difficulty breathing or throat swelling (anaphylaxis).
+- Burns covering more than 10% body surface area or involving face/hands/genitals.
+
+## Moderate Risk (Dermatology Consultation within 1-2 Weeks)
+- New mole or changing mole (asymmetry, border irregularity, color variation, diameter >6mm).
+- Persistent rash not responding to OTC treatment after 2 weeks.
+- Recurrent skin infections (boils, abscesses).
+- Widespread eczema flare affecting daily activities.
+
+## Low Risk / Self-Care
+- Mild contact dermatitis, insect bites, minor rashes.
+- Recommendation: Topical hydrocortisone 1%, antihistamines for itching, moisturizers for dry skin. Avoid known allergens. Seek care if spreading or not improving in 7 days.

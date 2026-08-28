@@ -1,0 +1,21 @@
+# Clinical Triage Guidelines: Abdominal Pain Assessment
+
+## Overview
+Abdominal pain can range from benign (indigestion) to surgical emergencies (appendicitis, perforation).
+
+## Red Flag Symptoms (Emergency)
+- Severe, sudden-onset abdominal pain with rigid abdomen.
+- Abdominal pain with bloody vomiting or black tarry stools.
+- Pain with signs of shock (rapid pulse, low BP, pale skin, confusion).
+- Suspected ectopic pregnancy (lower abdominal pain with missed period, vaginal bleeding).
+- Pain with high fever (>102°F) and inability to keep fluids down.
+
+## Moderate Risk (Urgent Consultation within 24 Hours)
+- Persistent pain lasting more than 6 hours without improvement.
+- Localized right lower quadrant pain (possible appendicitis).
+- Pain with persistent vomiting or diarrhea causing dehydration signs.
+- Abdominal pain with urinary symptoms (possible UTI or kidney stones).
+
+## Low Risk / Self-Care
+- Mild, intermittent cramping after meals, bloating, or gas.
+- Recommendation: Small bland meals, adequate hydration, avoid spicy/fatty foods. Antacids for mild heartburn. Monitor for 24 hours and seek care if worsening.
