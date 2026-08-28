@@ -1,0 +1,21 @@
+# Clinical Triage Guidelines: Musculoskeletal Pain
+
+## Overview
+Musculoskeletal complaints include joint pain, back pain, muscle strains, and injuries. Assessment focuses on ruling out fractures and serious conditions.
+
+## Red Flag Symptoms (Emergency)
+- Obvious deformity suggesting fracture or dislocation.
+- Severe pain after trauma with inability to bear weight.
+- Back pain with loss of bowel/bladder control (cauda equina syndrome).
+- Joint pain with red, hot, swollen joint and fever (septic arthritis).
+- Compartment syndrome signs: severe pain disproportionate to injury, tight swelling, pain with passive stretch.
+
+## Moderate Risk (Physician Consultation within 48 Hours)
+- Persistent joint swelling lasting more than 2 weeks.
+- Back pain radiating down the leg with numbness or weakness.
+- Sports injury with joint instability or locking.
+- Worsening pain despite rest and OTC medications.
+
+## Low Risk / Self-Care
+- Mild muscle soreness after exercise, minor strains.
+- Recommendation: RICE protocol (Rest, Ice, Compression, Elevation), OTC NSAIDs, gentle stretching after acute phase. Seek care if no improvement in 1 week.

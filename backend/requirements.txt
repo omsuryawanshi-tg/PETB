@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+pydantic[email]
+pydantic-settings
+sqlalchemy>=2.0
+chromadb
+langchain
+langchain-community
+langchain-ollama
+langchain-chroma
+langchain-huggingface
+sentence-transformers
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+bcrypt==4.0.1

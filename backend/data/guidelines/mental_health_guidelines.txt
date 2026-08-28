@@ -1,0 +1,21 @@
+# Clinical Triage Guidelines: Mental Health Assessment
+
+## Overview
+Mental health symptoms include anxiety, depression, sleep disturbances, and acute psychiatric presentations.
+
+## Red Flag Symptoms (Emergency)
+- Active suicidal ideation with a plan or means.
+- Homicidal thoughts or threats of violence.
+- Acute psychosis (hallucinations, delusions, disorganized behavior).
+- Severe agitation or catatonia.
+- Overdose or self-harm requiring medical treatment.
+
+## Moderate Risk (Mental Health Consultation within 1 Week)
+- Persistent low mood, loss of interest, or hopelessness lasting more than 2 weeks.
+- Panic attacks occurring frequently and affecting daily function.
+- Significant sleep disturbance (insomnia or hypersomnia) affecting daily life.
+- Increased substance use as coping mechanism.
+
+## Low Risk / Self-Care
+- Occasional stress, mild anxiety related to identifiable triggers.
+- Recommendation: Regular exercise, sleep hygiene, mindfulness or relaxation techniques, social support. Consider counseling if symptoms persist. Crisis helpline numbers should always be provided.

@@ -1,0 +1,21 @@
+# Clinical Triage Guidelines: Respiratory Symptoms
+
+## Overview
+Respiratory symptoms include cough, shortness of breath, wheezing, and chest tightness. They may indicate infections, asthma, COPD, or cardiac conditions.
+
+## Red Flag Symptoms (Emergency)
+- Severe shortness of breath at rest or inability to speak in full sentences.
+- Cyanosis (blue discoloration of lips or fingertips).
+- Stridor (high-pitched breathing sound) indicating upper airway obstruction.
+- Massive hemoptysis (coughing up large amounts of blood).
+- Sudden chest pain with shortness of breath (possible pulmonary embolism).
+
+## Moderate Risk (Physician Consultation within 24-48 Hours)
+- Persistent cough lasting more than 3 weeks.
+- Wheezing or chest tightness not responding to usual inhalers.
+- Productive cough with discolored sputum and mild fever.
+- Worsening of known asthma or COPD symptoms.
+
+## Low Risk / Self-Care
+- Common cold symptoms: mild cough, nasal congestion, sore throat.
+- Recommendation: Rest, warm fluids, honey for cough relief (adults), saline nasal rinse. OTC decongestants if needed. Seek care if symptoms persist beyond 10 days.

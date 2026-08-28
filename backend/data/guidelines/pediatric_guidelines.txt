@@ -1,0 +1,22 @@
+# Clinical Triage Guidelines: Pediatric Common Presentations
+
+## Overview
+Children require age-specific assessment. Key differences include faster deterioration, different vital sign ranges, and unique conditions.
+
+## Red Flag Symptoms (Emergency)
+- Infant under 3 months with fever ≥100.4°F (38°C).
+- Child with difficulty breathing, nasal flaring, chest retractions, or grunting.
+- Non-blanching rash (petechiae/purpura) in a child with fever.
+- Inconsolable crying, bulging fontanelle, or extreme lethargy in infants.
+- Severe dehydration: no tears, dry mouth, sunken eyes, no urine for 6+ hours.
+
+## Moderate Risk (Pediatrician within 24 Hours)
+- Fever lasting more than 3 days in children over 3 months.
+- Persistent vomiting or diarrhea with mild dehydration signs.
+- Ear pain with fever.
+- Wheezing or persistent cough in a child with known asthma.
+- Rash with mild fever but child otherwise active and feeding.
+
+## Low Risk / Self-Care
+- Common cold, mild cough, low-grade fever with child active and feeding well.
+- Recommendation: Age-appropriate fever reducers (Acetaminophen or Ibuprofen for children over 6 months), encourage fluids, rest. Monitor closely and seek care if symptoms worsen or child becomes lethargic.
