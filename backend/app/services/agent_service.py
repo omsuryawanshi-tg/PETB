@@ -1,10 +1,11 @@
 """
 Multi-turn conversational triage agent with tool calling via local Ollama LLM.
-Enhanced to work with normalized DB schema (Doctor + AppointmentSlot + Appointment).
+Refactored to use DoctorScheduleTemplate + Appointment (no more AppointmentSlot).
+Fixes false "already booked" bugs by computing availability dynamically.
 """
 import json
 import re
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from typing import Any, Optional
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
@@ -13,8 +14,9 @@ from langchain_ollama import ChatOllama
 
 from app.core.config import settings
 from app.db.session import SessionLocal
-from app.models.appointment import Appointment, AppointmentSlot
+from app.models.appointment import Appointment
 from app.models.doctor import Doctor
+from app.models.schedule import DoctorScheduleTemplate
 from app.models.triage_session import TriageSession
 from app.services.rag_service import get_relevant_context
 
@@ -37,8 +39,8 @@ YOUR WORKFLOW:
 3. If severity is LOW: give self-care advice. Do NOT push booking unless the patient asks.
 4. If severity is MEDIUM, HIGH, or approaching EMERGENCY (but not immediate 911): recommend seeing a doctor and ask for their preferred day or date.
 5. When the patient specifies a day or date, call the check_available_slots tool.
-6. Present available slots clearly (include slot ID, doctor name, specialty, date, time, clinic) and ask which one they want.
-7. When the patient selects a slot, call book_appointment with that slot_id.
+6. Present the slot results briefly — say something like "I found available slots for that day, please choose one from the options shown below." Do NOT list the slots in your message text — the frontend will display them as interactive cards.
+7. When the patient selects a slot (by mentioning a doctor name, time, or saying "book slot 1"), call book_appointment with the correct doctor_id, date, and time_slot.
 8. After a successful booking, confirm the appointment warmly and mention they will be redirected for confirmation.
 
 EMERGENCY RULE:
@@ -46,8 +48,9 @@ If symptoms suggest a true emergency (thunderclap headache, chest pain with shor
 
 TOOL RULES:
 - Call check_available_slots only when the user has indicated a preferred day or date.
-- Call book_appointment only when the user has clearly chosen a specific slot (by ID or uniquely identifying time/doctor).
+- Call book_appointment only when the user has clearly chosen a specific slot (by doctor name + time, or by slot number).
 - Never invent slots — only use tool results.
+- Do NOT list slots as text — just say "here are the available slots" and the frontend shows cards.
 
 SEVERITY ASSESSMENT:
 After each response, mentally note the severity level. Include severity assessment in your thinking but respond naturally to the patient.
@@ -56,102 +59,119 @@ After tools finish (or if no tools are needed), reply to the patient in natural 
 """
 
 
-def _slot_matches_day(day_or_date: str, slot_date: str) -> bool:
-    """Flexible match of user day/date text against a YYYY-MM-DD slot date."""
+def _resolve_date(day_or_date: str) -> list[str]:
+    """Resolve a user's day/date text to a list of YYYY-MM-DD date strings."""
     query = day_or_date.strip().lower()
-    if not query:
-        return False
+    today = date.today()
 
-    # Direct substring match (e.g. "2026-08-29")
-    if query in slot_date.lower():
-        return True
-
-    # Handle "today", "tomorrow"
-    today = datetime.now().date()
+    # Handle "today", "tomorrow" and Hindi equivalents
     if query in ("today", "aaj", "आज"):
-        return slot_date == today.strftime("%Y-%m-%d")
+        return [today.strftime("%Y-%m-%d")]
     if query in ("tomorrow", "kal", "कल"):
-        from datetime import timedelta
-        return slot_date == (today + timedelta(days=1)).strftime("%Y-%m-%d")
+        return [(today + timedelta(days=1)).strftime("%Y-%m-%d")]
 
+    # Try parsing as YYYY-MM-DD directly
     try:
-        dt = datetime.strptime(slot_date, "%Y-%m-%d")
+        dt = datetime.strptime(query, "%Y-%m-%d").date()
+        return [dt.strftime("%Y-%m-%d")]
     except ValueError:
-        return query in slot_date.lower()
+        pass
 
-    day_name = dt.strftime("%A").lower()
-    day_abbr = dt.strftime("%a").lower()
-    if query in (day_name, day_abbr) or day_name.startswith(query) or query.startswith(day_name):
-        return True
-
-    formats = [
-        dt.strftime("%B %d").lower(),
-        dt.strftime("%b %d").lower(),
-        dt.strftime("%d %B").lower(),
-        dt.strftime("%d %b").lower(),
-        dt.strftime("%B %d, %Y").lower(),
-        dt.strftime("%m/%d").lower(),
-        dt.strftime("%m/%d/%Y").lower(),
-    ]
-    return any(query in fmt or fmt in query for fmt in formats)
-
-
-def _format_time_12h(time_24h: str) -> str:
-    """Convert HH:MM 24h to 12h format (e.g. '09:00' → '9:00 AM')."""
-    try:
-        dt = datetime.strptime(time_24h, "%H:%M")
-        return dt.strftime("%-I:%M %p") if hasattr(dt, 'strftime') else dt.strftime("%I:%M %p").lstrip("0")
-    except (ValueError, AttributeError):
+    # Try common date formats
+    for fmt in ("%B %d", "%b %d", "%d %B", "%d %b", "%B %d, %Y", "%m/%d", "%m/%d/%Y", "%d/%m/%Y"):
         try:
-            dt = datetime.strptime(time_24h, "%H:%M")
-            result = dt.strftime("%I:%M %p")
-            return result.lstrip("0") if result.startswith("0") else result
+            dt = datetime.strptime(query, fmt).date()
+            # If no year in format, use current year (or next year if date already passed)
+            if "%Y" not in fmt:
+                dt = dt.replace(year=today.year)
+                if dt < today:
+                    dt = dt.replace(year=today.year + 1)
+            return [dt.strftime("%Y-%m-%d")]
         except ValueError:
-            return time_24h
+            continue
+
+    # Try matching day name (e.g. "friday", "monday") — find the next occurrence within 7 days
+    day_names = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+    for i, name in enumerate(day_names):
+        if query == name or query == name[:3] or name.startswith(query):
+            # Find the next occurrence of this weekday
+            days_ahead = i - today.weekday()
+            if days_ahead <= 0:
+                days_ahead += 7
+            target = today + timedelta(days=days_ahead)
+            return [target.strftime("%Y-%m-%d")]
+
+    # Fallback: return next 3 days
+    return [(today + timedelta(days=d)).strftime("%Y-%m-%d") for d in range(1, 4)]
 
 
 @tool
 def check_available_slots(day_or_date: str) -> str:
-    """Query the database for available appointment slots matching a day name or date.
-    Use when the patient specifies a preferred day or date (e.g. 'Friday', '2026-08-29', 'tomorrow').
-    Returns available slots with IDs, doctor names, specialties, dates, times, and clinics.
+    """Query available appointment slots for a day name or date.
+    Use when the patient specifies a preferred day or date (e.g. 'Friday', '2026-09-01', 'tomorrow').
+    Returns available slots with doctor names, specialties, dates, times, and clinics.
     """
     db = SessionLocal()
     try:
-        available = (
-            db.query(AppointmentSlot, Doctor)
-            .join(Doctor, AppointmentSlot.doctor_id == Doctor.id)
-            .filter(AppointmentSlot.status == "available")
+        dates = _resolve_date(day_or_date)
+
+        # Get all active schedule templates with doctor info
+        templates = (
+            db.query(DoctorScheduleTemplate, Doctor)
+            .join(Doctor, DoctorScheduleTemplate.doctor_id == Doctor.id)
+            .filter(DoctorScheduleTemplate.is_active == True)
             .all()
         )
-        matched = [
-            (slot, doc) for slot, doc in available
-            if _slot_matches_day(day_or_date, slot.date)
-        ]
 
-        if not matched:
-            all_dates = sorted({s.date for s, _ in available})
+        # Get existing non-cancelled appointments for the target dates
+        existing_appointments = (
+            db.query(Appointment)
+            .filter(
+                Appointment.date.in_(dates),
+                Appointment.status != "cancelled",
+            )
+            .all()
+        )
+
+        # Build a set of booked (doctor_id, date, time_slot) tuples
+        booked = {
+            (appt.doctor_id, appt.date, appt.time_slot)
+            for appt in existing_appointments
+        }
+
+        # Compute available slots
+        slots = []
+        for target_date in dates:
+            # Skip Sundays
+            dt = datetime.strptime(target_date, "%Y-%m-%d").date()
+            if dt.weekday() == 6:
+                continue
+
+            for template, doctor in templates:
+                time_slot = f"{template.start_time} - {template.end_time}"
+                if (doctor.id, target_date, time_slot) not in booked:
+                    slots.append({
+                        "doctor_id": doctor.id,
+                        "doctor_name": doctor.name,
+                        "specialty": doctor.specialty,
+                        "clinic": doctor.clinic_name,
+                        "consultation_fee": doctor.consultation_fee,
+                        "rating": doctor.rating,
+                        "date": target_date,
+                        "time_slot": time_slot,
+                    })
+
+        if not slots:
+            # Show which dates have no availability
             return json.dumps({
                 "found": False,
                 "message": f"No available slots found for '{day_or_date}'.",
-                "available_dates": all_dates if all_dates else [],
-                "hint": f"Available dates: {', '.join(all_dates)}" if all_dates else "No available slots in the system.",
+                "hint": "The patient can try a different day.",
             })
 
-        slots = [
-            {
-                "slot_id": slot.id,
-                "doctor_name": doc.name,
-                "specialty": doc.specialty,
-                "clinic": doc.clinic_name,
-                "consultation_fee": doc.consultation_fee,
-                "rating": doc.rating,
-                "date": slot.date,
-                "time": _format_time_12h(slot.start_time),
-                "end_time": _format_time_12h(slot.end_time),
-            }
-            for slot, doc in matched
-        ]
+        # Sort by date, then doctor name, then time
+        slots.sort(key=lambda s: (s["date"], s["doctor_name"], s["time_slot"]))
+
         return json.dumps({"found": True, "count": len(slots), "slots": slots})
     except Exception as e:
         return json.dumps({"found": False, "error": str(e)})
@@ -160,33 +180,81 @@ def check_available_slots(day_or_date: str) -> str:
 
 
 @tool
-def book_appointment(slot_id: int) -> str:
-    """Book an available appointment slot by slot ID for the current patient.
-    Use when the patient has selected a specific slot. Updates slot status to 'booked' and creates an appointment record.
+def book_appointment(doctor_id: int, date: str, time_slot: str) -> str:
+    """Book an appointment with a specific doctor on a specific date and time slot.
+    Use when the patient has selected a specific slot. Atomically checks availability and creates the appointment.
+    Args:
+        doctor_id: The doctor's ID
+        date: The appointment date in YYYY-MM-DD format
+        time_slot: The time slot string, e.g. '09:30 AM - 10:00 AM'
     """
     db = SessionLocal()
     try:
-        slot = db.query(AppointmentSlot).filter(AppointmentSlot.id == slot_id).first()
-        if not slot:
-            return json.dumps({"success": False, "error": f"Slot #{slot_id} not found."})
-        if slot.status != "available":
-            return json.dumps({"success": False, "error": f"Slot #{slot_id} is already booked."})
+        # Verify the doctor exists
+        doctor = db.query(Doctor).filter(Doctor.id == doctor_id).first()
+        if not doctor:
+            return json.dumps({"success": False, "error": f"Doctor #{doctor_id} not found."})
 
-        doctor = db.query(Doctor).filter(Doctor.id == slot.doctor_id).first()
+        # Verify this time slot is in the doctor's active schedule
+        parts = time_slot.split(" - ")
+        if len(parts) != 2:
+            return json.dumps({"success": False, "error": f"Invalid time_slot format: '{time_slot}'."})
 
-        # Mark slot as booked
-        slot.status = "booked"
+        start_time, end_time = parts[0].strip(), parts[1].strip()
+        template = (
+            db.query(DoctorScheduleTemplate)
+            .filter(
+                DoctorScheduleTemplate.doctor_id == doctor_id,
+                DoctorScheduleTemplate.start_time == start_time,
+                DoctorScheduleTemplate.end_time == end_time,
+                DoctorScheduleTemplate.is_active == True,
+            )
+            .first()
+        )
+        if not template:
+            return json.dumps({
+                "success": False,
+                "error": f"Time slot '{time_slot}' is not in Dr. {doctor.name}'s schedule.",
+            })
+
+        # Atomic check: is this slot already booked?
+        existing = (
+            db.query(Appointment)
+            .filter(
+                Appointment.doctor_id == doctor_id,
+                Appointment.date == date,
+                Appointment.time_slot == time_slot,
+                Appointment.status != "cancelled",
+            )
+            .first()
+        )
+        if existing:
+            return json.dumps({
+                "success": False,
+                "error": f"This slot is already booked (Appointment #{existing.id}).",
+            })
+
+        # Create the appointment (patient_id will be set by the API layer)
+        appointment = Appointment(
+            doctor_id=doctor_id,
+            date=date,
+            time_slot=time_slot,
+            status="confirmed",
+        )
+        db.add(appointment)
         db.commit()
-        db.refresh(slot)
+        db.refresh(appointment)
 
         confirmation = {
             "success": True,
-            "slot_id": slot.id,
-            "doctor_name": doctor.name if doctor else "Doctor",
-            "specialty": doctor.specialty if doctor else "",
-            "clinic": doctor.clinic_name if doctor else "",
-            "date": slot.date,
-            "time": _format_time_12h(slot.start_time),
+            "appointment_id": appointment.id,
+            "doctor_id": doctor.id,
+            "doctor_name": doctor.name,
+            "specialty": doctor.specialty,
+            "clinic_name": doctor.clinic_name,
+            "date": date,
+            "time_slot": time_slot,
+            "fee": doctor.consultation_fee,
         }
         return json.dumps(confirmation)
     except Exception as e:
@@ -282,8 +350,9 @@ def run_triage_agent(
         {
             "response_message": str,
             "severity": str | None,
-            "action": "NONE" | "REDIRECT_TO_CONFIRMATION",
-            "booking_details": optional dict
+            "action": "NONE" | "SHOW_SLOTS" | "REDIRECT_TO_CONFIRMATION",
+            "available_slots": list[dict],  # populated when action is SHOW_SLOTS
+            "booking_details": optional dict,
         }
     """
     user_text = _latest_user_text(messages)
@@ -303,6 +372,7 @@ def run_triage_agent(
 
     lc_messages = _to_langchain_messages(system_prompt, messages)
     booking_details: Optional[dict] = None
+    available_slots: list[dict] = []
     severity: Optional[str] = None
 
     try:
@@ -328,25 +398,34 @@ def run_triage_agent(
                     except Exception as tool_err:
                         result_str = json.dumps({"error": str(tool_err)})
 
+                # Capture structured slot data for the API response
+                if name == "check_available_slots":
+                    try:
+                        parsed = json.loads(result_str) if isinstance(result_str, str) else result_str
+                        if isinstance(parsed, dict) and parsed.get("found") and parsed.get("slots"):
+                            available_slots = parsed["slots"]
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+
                 # Capture successful booking for the API response envelope
                 if name == "book_appointment":
                     try:
                         parsed = json.loads(result_str) if isinstance(result_str, str) else result_str
                         if isinstance(parsed, dict) and parsed.get("success"):
                             booking_details = {
-                                "appointment_id": parsed.get("slot_id"),
+                                "appointment_id": parsed.get("appointment_id"),
                                 "doctor_name": parsed.get("doctor_name", ""),
                                 "specialty": parsed.get("specialty", ""),
+                                "clinic_name": parsed.get("clinic_name", ""),
                                 "date": parsed.get("date", ""),
-                                "time": parsed.get("time", ""),
-                                "clinic": parsed.get("clinic", ""),
+                                "time_slot": parsed.get("time_slot", ""),
+                                "fee": parsed.get("fee", 0.0),
                             }
-                            # Create actual Appointment record if patient_id is available
-                            if patient_id:
-                                _create_appointment_record(
+                            # Set patient_id on the appointment if available
+                            if patient_id and parsed.get("appointment_id"):
+                                _set_patient_on_appointment(
+                                    appointment_id=parsed["appointment_id"],
                                     patient_id=patient_id,
-                                    slot_id=parsed.get("slot_id"),
-                                    booking_details=booking_details,
                                 )
                     except (json.JSONDecodeError, TypeError):
                         pass
@@ -381,12 +460,13 @@ def run_triage_agent(
                 bd = parsed_blob["booking_details"]
                 if isinstance(bd, dict):
                     booking_details = {
-                        "appointment_id": bd.get("appointment_id") or bd.get("slot_id"),
+                        "appointment_id": bd.get("appointment_id") or bd.get("id"),
                         "doctor_name": bd.get("doctor_name", ""),
                         "specialty": bd.get("specialty", ""),
+                        "clinic_name": bd.get("clinic_name", bd.get("clinic", "")),
                         "date": bd.get("date", ""),
-                        "time": bd.get("time", bd.get("time_slot", "")),
-                        "clinic": bd.get("clinic", ""),
+                        "time_slot": bd.get("time_slot", bd.get("time", "")),
+                        "fee": bd.get("fee", 0.0),
                     }
 
         # Detect severity from response
@@ -397,33 +477,34 @@ def run_triage_agent(
         response_message = _fallback_message(user_text, language)
         severity = _detect_severity_from_input(user_text)
 
-    action = "REDIRECT_TO_CONFIRMATION" if booking_details else "NONE"
+    # Determine action
+    if booking_details:
+        action = "REDIRECT_TO_CONFIRMATION"
+    elif available_slots:
+        action = "SHOW_SLOTS"
+    else:
+        action = "NONE"
+
     return {
         "response_message": response_message,
         "severity": severity,
         "action": action,
+        "available_slots": available_slots,
         "booking_details": booking_details,
     }
 
 
-def _create_appointment_record(patient_id: int, slot_id: int, booking_details: dict) -> None:
-    """Create an Appointment record in the database after successful tool booking."""
+def _set_patient_on_appointment(appointment_id: int, patient_id: int) -> None:
+    """Set patient_id on an appointment that was created by the tool (without patient context)."""
     db = SessionLocal()
     try:
-        existing = db.query(Appointment).filter(Appointment.slot_id == slot_id).first()
-        if existing:
-            return  # Already booked
-
-        appt = Appointment(
-            patient_id=patient_id,
-            slot_id=slot_id,
-            booking_status="confirmed",
-        )
-        db.add(appt)
-        db.commit()
+        appt = db.query(Appointment).filter(Appointment.id == appointment_id).first()
+        if appt and not appt.patient_id:
+            appt.patient_id = patient_id
+            db.commit()
     except Exception as e:
         db.rollback()
-        print(f"[Agent] Failed to create appointment record: {e}")
+        print(f"[Agent] Failed to set patient on appointment: {e}")
     finally:
         db.close()
 

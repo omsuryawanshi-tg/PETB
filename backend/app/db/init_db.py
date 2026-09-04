@@ -1,15 +1,14 @@
 """
-Database seeder — populates doctors, appointment slots, and clinical guideline files.
+Database seeder — populates doctors, schedule templates, and clinical guideline files.
 Designed to be idempotent (only seeds if tables are empty).
 """
 import os
-from datetime import date, timedelta
 
 from app.core.config import settings
 from app.core.security import hash_password
 from app.db.session import SessionLocal
-from app.models.appointment import AppointmentSlot
 from app.models.doctor import Doctor
+from app.models.schedule import DoctorScheduleTemplate
 from app.models.user import User
 
 
@@ -54,20 +53,32 @@ SEED_DOCTORS = [
 ]
 
 
-# ─── Slot Time Templates ─────────────────────────────────────────────────────
+# ─── Schedule Templates (recurring daily time windows) ────────────────────────
 
-SLOT_TIMES = [
-    ("09:00", "09:30"),
-    ("09:30", "10:00"),
-    ("10:00", "10:30"),
-    ("10:30", "11:00"),
-    ("11:00", "11:30"),
-    ("14:00", "14:30"),
-    ("14:30", "15:00"),
-    ("15:00", "15:30"),
-    ("15:30", "16:00"),
-    ("16:00", "16:30"),
+# Each doctor gets a subset of these. Times are stored in 12h format.
+ALL_SCHEDULE_TIMES = [
+    ("09:00 AM", "09:30 AM"),
+    ("09:30 AM", "10:00 AM"),
+    ("10:00 AM", "10:30 AM"),
+    ("10:30 AM", "11:00 AM"),
+    ("11:00 AM", "11:30 AM"),
+    ("11:30 AM", "12:00 PM"),
+    ("02:00 PM", "02:30 PM"),
+    ("02:30 PM", "03:00 PM"),
+    ("03:00 PM", "03:30 PM"),
+    ("03:30 PM", "04:00 PM"),
+    ("04:00 PM", "04:30 PM"),
+    ("04:30 PM", "05:00 PM"),
 ]
+
+# Doctor index → which time slots from ALL_SCHEDULE_TIMES they use
+DOCTOR_SCHEDULE_MAP = {
+    0: [0, 1, 2, 3, 4, 6, 7, 8],       # Dr. Aditi Rao — 8 slots (busy GP)
+    1: [1, 2, 3, 7, 8, 9],              # Dr. Vikram Mehta — 6 slots
+    2: [0, 1, 2, 3, 6, 7, 8, 9, 10],    # Dr. Sneha Kulkarni — 9 slots (pediatrics)
+    3: [2, 3, 4, 5, 8, 9, 10, 11],      # Dr. Rajesh Sharma — 8 slots (cardiology)
+    4: [0, 1, 6, 7, 8, 9],              # Dr. Priya Nair — 6 slots
+}
 
 
 # ─── Clinical Guidelines ─────────────────────────────────────────────────────
@@ -319,12 +330,12 @@ Allergic reactions range from mild localized responses to life-threatening anaph
 
 
 def seed_database() -> None:
-    """Seed the database with doctors, slots, guidelines, and an admin account. Idempotent."""
+    """Seed the database with doctors, schedules, guidelines, and an admin account. Idempotent."""
     db = SessionLocal()
     try:
         _seed_admin(db)
         _seed_doctors(db)
-        _seed_slots(db)
+        _seed_schedules(db)
         _seed_guidelines()
     except Exception as e:
         print(f"[Seed] Error during seeding: {e}")
@@ -362,47 +373,31 @@ def _seed_doctors(db) -> None:
     print(f"[Seed] {len(SEED_DOCTORS)} doctors seeded.")
 
 
-def _seed_slots(db) -> None:
-    """Seed 30+ appointment slots across the next 7 days if the table is empty."""
-    if db.query(AppointmentSlot).count() > 0:
+def _seed_schedules(db) -> None:
+    """Seed recurring schedule templates for each doctor if the table is empty."""
+    if db.query(DoctorScheduleTemplate).count() > 0:
         return
 
     doctors = db.query(Doctor).all()
     if not doctors:
         return
 
-    today = date.today()
-    slot_count = 0
-
-    for day_offset in range(1, 8):  # next 7 days
-        slot_date = today + timedelta(days=day_offset)
-        date_str = slot_date.strftime("%Y-%m-%d")
-
-        # Skip Sundays
-        if slot_date.weekday() == 6:
-            continue
-
-        for doctor in doctors:
-            # Each doctor gets 2-4 slots per day (vary by doctor index)
-            doc_idx = doctors.index(doctor)
-            start_idx = (doc_idx * 2) % len(SLOT_TIMES)
-            num_slots = 2 + (doc_idx % 3)  # 2, 3, or 4 slots
-
-            for i in range(num_slots):
-                time_idx = (start_idx + i) % len(SLOT_TIMES)
-                start_time, end_time = SLOT_TIMES[time_idx]
-                slot = AppointmentSlot(
-                    doctor_id=doctor.id,
-                    date=date_str,
-                    start_time=start_time,
-                    end_time=end_time,
-                    status="available",
-                )
-                db.add(slot)
-                slot_count += 1
+    schedule_count = 0
+    for idx, doctor in enumerate(doctors):
+        slot_indices = DOCTOR_SCHEDULE_MAP.get(idx, [0, 1, 6, 7])
+        for si in slot_indices:
+            start_time, end_time = ALL_SCHEDULE_TIMES[si]
+            template = DoctorScheduleTemplate(
+                doctor_id=doctor.id,
+                start_time=start_time,
+                end_time=end_time,
+                is_active=True,
+            )
+            db.add(template)
+            schedule_count += 1
 
     db.commit()
-    print(f"[Seed] {slot_count} appointment slots seeded across next 7 days.")
+    print(f"[Seed] {schedule_count} schedule templates seeded for {len(doctors)} doctors.")
 
 
 def _seed_guidelines() -> None:

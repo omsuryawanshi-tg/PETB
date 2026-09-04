@@ -1,4 +1,6 @@
 import { Bot, UserRound } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import clsx from 'clsx'
 
 export default function MessageBubble({ role, content, severity }) {
@@ -24,7 +26,15 @@ export default function MessageBubble({ role, content, severity }) {
             : 'rounded-bl-md border border-slate-100 bg-white text-slate-800 shadow-soft',
         )}
       >
-        {content}
+        {isUser ? (
+          content
+        ) : (
+          <div className="prose-chat">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {content}
+            </ReactMarkdown>
+          </div>
+        )}
       </div>
       {isUser && (
         <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">

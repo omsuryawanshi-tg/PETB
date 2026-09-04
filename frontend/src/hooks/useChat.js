@@ -20,6 +20,7 @@ export function useChat(language = 'en') {
   const [severity, setSeverity] = useState(null)
   const [bookingDetails, setBookingDetails] = useState(null)
   const [showBookingBadge, setShowBookingBadge] = useState(false)
+  const [availableSlots, setAvailableSlots] = useState([])
   const redirectTimerRef = useRef(null)
 
   const resetChat = useCallback(() => {
@@ -33,6 +34,7 @@ export function useChat(language = 'en') {
     setSeverity(null)
     setBookingDetails(null)
     setShowBookingBadge(false)
+    setAvailableSlots([])
     if (redirectTimerRef.current) {
       clearTimeout(redirectTimerRef.current)
       redirectTimerRef.current = null
@@ -44,6 +46,9 @@ export function useChat(language = 'en') {
       if (!text.trim() || isLoading) return null
 
       setError(null)
+      // Clear previous slots when user sends a new message
+      setAvailableSlots([])
+
       const userMsg = { role: 'user', content: text.trim() }
       const nextMessages = [...messages, userMsg]
       setMessages(nextMessages)
@@ -70,12 +75,22 @@ export function useChat(language = 'en') {
           setSeverity(response.severity)
         }
 
+        // Handle SHOW_SLOTS — structured slot data for card rendering
+        if (
+          response.action === 'SHOW_SLOTS' &&
+          response.available_slots?.length > 0
+        ) {
+          setAvailableSlots(response.available_slots)
+        }
+
+        // Handle REDIRECT_TO_CONFIRMATION — booking succeeded
         if (
           response.action === 'REDIRECT_TO_CONFIRMATION' &&
           response.booking_details
         ) {
           setBookingDetails(response.booking_details)
           setShowBookingBadge(true)
+          setAvailableSlots([]) // clear slots after booking
         }
 
         return response
@@ -101,6 +116,7 @@ export function useChat(language = 'en') {
     severity,
     bookingDetails,
     showBookingBadge,
+    availableSlots,
     sendMessage,
     resetChat,
     redirectTimerRef,

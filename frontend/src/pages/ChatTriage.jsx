@@ -7,6 +7,7 @@ import MessageBubble from '../components/chat/MessageBubble'
 import QuickChips from '../components/chat/QuickChips'
 import TypingIndicator from '../components/chat/TypingIndicator'
 import ActionCard from '../components/chat/ActionCard'
+import SlotCard from '../components/chat/SlotCard'
 import clsx from 'clsx'
 import { useState } from 'react'
 
@@ -34,6 +35,7 @@ export default function ChatTriage() {
     severity,
     bookingDetails,
     showBookingBadge,
+    availableSlots,
     sendMessage,
     redirectTimerRef,
   } = useChat(language)
@@ -44,7 +46,7 @@ export default function ChatTriage() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isLoading, showBookingBadge])
+  }, [messages, isLoading, showBookingBadge, availableSlots])
 
   useEffect(() => {
     return () => {
@@ -61,9 +63,15 @@ export default function ChatTriage() {
         navigate('/confirmation', {
           state: { booking: bookingDetails },
         })
-      }, 2000)
+      }, 2500)
     }
   }, [showBookingBadge, bookingDetails, navigate, redirectTimerRef])
+
+  // Handle slot selection — sends a booking message to the agent
+  function handleSlotBook(slot) {
+    const bookingMsg = `Book appointment with ${slot.doctor_name} on ${slot.date} at ${slot.time_slot} (Doctor ID: ${slot.doctor_id})`
+    handleSend(bookingMsg)
+  }
 
   async function handleSend(rawText) {
     const text = (rawText ?? input).trim()
@@ -117,6 +125,25 @@ export default function ChatTriage() {
           ))}
 
           {isLoading && <TypingIndicator />}
+
+          {/* Slot Cards Grid */}
+          {availableSlots.length > 0 && !isLoading && (
+            <div className="animate-fade-in-up">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Available Slots
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {availableSlots.map((slot, idx) => (
+                  <SlotCard
+                    key={`${slot.doctor_id}-${slot.date}-${slot.time_slot}-${idx}`}
+                    slot={slot}
+                    onBook={handleSlotBook}
+                    disabled={isLoading || showBookingBadge}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {showBookingBadge && <ActionCard booking={bookingDetails} />}
 

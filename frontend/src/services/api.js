@@ -61,13 +61,15 @@ export async function getAvailableSlots(date = '', specialty = '') {
 }
 
 /**
- * Book an appointment slot.
+ * Book an appointment slot (new schema: doctor_id + date + time_slot).
  */
-export async function bookAppointment(slotId, reason = '', triageSessionId = null) {
+export async function bookAppointment(doctorId, date, timeSlot, reason = '', triageSessionId = null) {
   return request('/api/v1/appointments/book', {
     method: 'POST',
     body: JSON.stringify({
-      slot_id: Number(slotId),
+      doctor_id: Number(doctorId),
+      date,
+      time_slot: timeSlot,
       reason_for_visit: reason,
       triage_session_id: triageSessionId,
     }),
