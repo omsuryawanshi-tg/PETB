@@ -1,5 +1,6 @@
 """
 Appointment endpoints — slot listing, booking, history, and cancellation.
+Updated for new schema: no more AppointmentSlot, uses doctor_id + date + time_slot.
 """
 from typing import Optional
 
@@ -26,8 +27,8 @@ def list_available_slots(
     specialty: Optional[str] = Query(default=None, description="Filter by doctor specialty"),
     db: Session = Depends(get_db),
 ):
-    """List all available appointment slots, optionally filtered by date or specialty."""
-    return get_available_slots(db, date=date, specialty=specialty)
+    """List available appointment slots, computed dynamically from schedule templates."""
+    return get_available_slots(db, target_date=date, specialty=specialty)
 
 
 @router.post("/book", response_model=AppointmentOut, status_code=status.HTTP_201_CREATED)
@@ -36,12 +37,14 @@ def book_appointment(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Book an available slot for the authenticated patient."""
+    """Book an appointment for the authenticated patient using doctor_id + date + time_slot."""
     try:
         appt = book_slot(
             db=db,
             patient_id=current_user.id,
-            slot_id=payload.slot_id,
+            doctor_id=payload.doctor_id,
+            target_date=payload.date,
+            time_slot=payload.time_slot,
             triage_session_id=payload.triage_session_id,
             reason=payload.reason_for_visit,
         )
@@ -73,7 +76,7 @@ def cancel_booking(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Cancel an existing appointment (restores the slot to available)."""
+    """Cancel an existing appointment."""
     try:
         appt = cancel_appointment(db, appointment_id, current_user.id)
     except ValueError as e:

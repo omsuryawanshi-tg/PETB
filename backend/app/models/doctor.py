@@ -18,7 +18,8 @@ class Doctor(Base):
     rating = Column(Float, nullable=False, default=4.0)
 
     # Relationships
-    slots = relationship("AppointmentSlot", back_populates="doctor", lazy="dynamic")
+    schedules = relationship("DoctorScheduleTemplate", back_populates="doctor", lazy="dynamic")
+    appointments = relationship("Appointment", back_populates="doctor", lazy="dynamic")
 
     def __repr__(self) -> str:
         return f"<Doctor id={self.id} name={self.name!r} specialty={self.specialty!r}>"

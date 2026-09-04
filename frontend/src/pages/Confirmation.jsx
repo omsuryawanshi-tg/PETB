@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock3,
   Download,
+  IndianRupee,
   MapPin,
   MessageSquareText,
   Stethoscope,
@@ -27,8 +28,9 @@ export default function Confirmation() {
   const doctor = booking.doctor_name || 'Assigned Clinician'
   const specialty = booking.specialty || ''
   const dateStr = booking.date || '—'
-  const time = booking.time || booking.time_slot || '—'
-  const clinic = booking.clinic || ''
+  const time = booking.time_slot || booking.time || '—'
+  const clinic = booking.clinic_name || booking.clinic || ''
+  const fee = booking.fee || 0
   const bookingId = booking.appointment_id || booking.id || '—'
 
   function generateICS() {
@@ -76,6 +78,7 @@ export default function Confirmation() {
           <DetailRow icon={CalendarDays} label="Date" value={dateStr} />
           <DetailRow icon={Clock3} label="Time" value={time} />
           {clinic && <DetailRow icon={MapPin} label="Clinic" value={clinic} />}
+          {fee > 0 && <DetailRow icon={IndianRupee} label="Fee" value={`₹${fee}`} />}
           <DetailRow icon={Tag} label="Booking Ref" value={`#${bookingId}`} />
         </dl>
 

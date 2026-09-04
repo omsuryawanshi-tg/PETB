@@ -1,4 +1,4 @@
-import { CalendarCheck2, MapPin, Stethoscope } from 'lucide-react'
+import { CalendarCheck2, IndianRupee, MapPin, Stethoscope } from 'lucide-react'
 
 export default function ActionCard({ booking }) {
   if (!booking) return null
@@ -11,7 +11,7 @@ export default function ActionCard({ booking }) {
             <CalendarCheck2 className="h-4 w-4" aria-hidden />
           </div>
           <p className="text-sm font-semibold text-emerald-800">
-            Appointment Confirmed
+            Appointment Confirmed — Redirecting…
           </p>
         </div>
         <div className="space-y-1.5 text-sm text-slate-700">
@@ -24,12 +24,18 @@ export default function ActionCard({ booking }) {
           </div>
           <div className="flex items-center gap-2">
             <CalendarCheck2 className="h-3.5 w-3.5 text-slate-400" aria-hidden />
-            <span>{booking.date} at {booking.time}</span>
+            <span>{booking.date} at {booking.time_slot}</span>
           </div>
-          {booking.clinic && (
+          {booking.clinic_name && (
             <div className="flex items-center gap-2">
               <MapPin className="h-3.5 w-3.5 text-slate-400" aria-hidden />
-              <span className="text-xs">{booking.clinic}</span>
+              <span className="text-xs">{booking.clinic_name}</span>
+            </div>
+          )}
+          {booking.fee > 0 && (
+            <div className="flex items-center gap-2">
+              <IndianRupee className="h-3.5 w-3.5 text-slate-400" aria-hidden />
+              <span className="text-xs font-semibold">₹{booking.fee}</span>
             </div>
           )}
         </div>

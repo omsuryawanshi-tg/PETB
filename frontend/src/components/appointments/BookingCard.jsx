@@ -1,4 +1,4 @@
-import { CalendarDays, Clock3, MapPin, Stethoscope } from 'lucide-react'
+import { CalendarDays, Clock3, IndianRupee, MapPin, Stethoscope } from 'lucide-react'
 import StatusBadge from './StatusBadge'
 
 export default function BookingCard({ appointment, onCancel }) {
@@ -26,12 +26,18 @@ export default function BookingCard({ appointment, onCancel }) {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <Clock3 className="h-3.5 w-3.5 text-slate-400" aria-hidden />
-              {appointment.start_time || '—'}
+              {appointment.time_slot || '—'}
             </span>
             {appointment.clinic_name && (
               <span className="inline-flex items-center gap-1.5">
                 <MapPin className="h-3.5 w-3.5 text-slate-400" aria-hidden />
                 {appointment.clinic_name}
+              </span>
+            )}
+            {appointment.consultation_fee > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <IndianRupee className="h-3.5 w-3.5 text-slate-400" aria-hidden />
+                ₹{appointment.consultation_fee}
               </span>
             )}
           </div>

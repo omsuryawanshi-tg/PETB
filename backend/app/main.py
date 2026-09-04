@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI):
     """Application startup and shutdown lifecycle."""
     # --- STARTUP ---
     # Import all models so SQLAlchemy registers them with Base.metadata
-    from app.models import user, doctor, appointment, triage_session  # noqa: F401
+    from app.models import user, doctor, schedule, appointment, triage_session  # noqa: F401
 
     # Create all tables
     Base.metadata.create_all(bind=engine)
